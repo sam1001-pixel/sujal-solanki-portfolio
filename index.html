@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="day">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sujal Solanki — Vibe Coder & Creative Developer</title>
+  <meta name="description" content="Portfolio of Sujal Solanki — Vibe Coder, BCA Scholar & Creative Freelance Web Developer." />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ════════════════════════════════════════════════════════
+       1. GAME THEME ENGINE (DAY DEFAULT vs NIGHT SWITCHABLE)
+    ════════════════════════════════════════════════════════ */
+    [data-theme="day"] {
+      --bg: #f4f6fb;
+      --bg-alt: #e9eef8;
+      --surface: #ffffff;
+      --surface-hover: #f8fafc;
+      --border: rgba(15, 23, 42, 0.12);
+      --border-glow: #7c3aed;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #64748b;
+      
+      --purple: #7c3aed;
+      --purple-glow: rgba(124, 58, 237, 0.25);
+      --cyan: #0284c7;
+      --cyan-glow: rgba(2, 132, 199, 0.25);
+      --pink: #e11d48;
+      --emerald: #059669;
+      --amber: #d97706;
+      
+      --card-bg: rgba(255, 255, 255, 0.9);
+      --hud-bg: rgba(255, 255, 255, 0.92);
+      --grid-line: rgba(124, 58, 237, 0.06);
+      --shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+    }
+
+    [data-theme="night"] {
+      --bg: #050512;
+      --bg-alt: #0a0a20;
+      --surface: rgba(255, 255, 255, 0.05);
+      --surface-hover: rgba(255, 255, 255, 0.09);
+      --border: rgba(255, 255, 255, 0.12);
+      --border-glow: #a78bfa;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      --purple: #a78bfa;
+      --purple-glow: rgba(167, 139, 250, 0.4);
+      --cyan: #38bdf8;
+      --cyan-glow: rgba(56, 189, 248, 0.4);
+      --pink: #fb7185;
+      --emerald: #34d399;
+      --amber: #fbbf24;
+      
+      --card-bg: rgba(12, 12, 30, 0.85);
+      --hud-bg: rgba(5, 5, 18, 0.92);
+      --grid-line: rgba(255, 255, 255, 0.04);
+      --shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    /* ════════════════════════════════════════════════════════
+       2. RESET & FOUNDATIONS
+    ════════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      transition: background-color 0.4s ease, color 0.4s ease;
+      cursor: none;
+    }
+    ::selection { background: var(--purple); color: #fff; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: linear-gradient(var(--purple), var(--cyan)); border-radius: 99px; }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; border: none; outline: none; background: none; font-family: inherit; }
+
+    /* Custom Game Cursor */
+    #cursor-dot {
+      position: fixed; width: 12px; height: 12px;
+      background: var(--pink); border-radius: 2px;
+      pointer-events: none; z-index: 9999;
+      transform: translate(-50%, -50%) rotate(45deg);
+      box-shadow: 0 0 12px var(--pink);
+      transition: transform 0.15s, background-color 0.2s;
+    }
+    #cursor-ring {
+      position: fixed; width: 38px; height: 38px;
+      border: 2px solid var(--purple); border-radius: 6px;
+      pointer-events: none; z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: width 0.2s, height 0.2s, border-color 0.2s, transform 0.08s ease-out;
+    }
+    body:has(a:hover, button:hover, .interactive:hover) #cursor-dot {
+      width: 18px; height: 18px; background: var(--cyan);
+    }
+    body:has(a:hover, button:hover, .interactive:hover) #cursor-ring {
+      width: 52px; height: 52px; border-color: var(--cyan); transform: translate(-50%, -50%) rotate(45deg);
+    }
+
+    /* Background Grid & Game Canvas */
+    .bg-grid-pattern {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
+                        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    #hero-game-canvas { position: absolute; inset: 0; z-index: 1; pointer-events: auto; }
+
+    /* ════════════════════════════════════════════════════════
+       3. GLITCH TEXT & PIXEL BADGES
+    ════════════════════════════════════════════════════════ */
+    .pixel-font { font-family: 'Press Start 2P', monospace; }
+    
+    .glitch {
+      position: relative; display: inline-block;
+    }
+    .glitch:hover {
+      animation: glitch-anim 0.35s linear infinite;
+    }
+    @keyframes glitch-anim {
+      0% { text-shadow: none; }
+      25% { text-shadow: 3px 0 var(--purple), -3px 0 var(--cyan); clip-path: inset(10% 0 40% 0); }
+      50% { text-shadow: -3px 0 var(--pink), 3px 0 var(--emerald); clip-path: inset(50% 0 15% 0); }
+      75% { text-shadow: 3px 0 var(--cyan), -3px 0 var(--amber); clip-path: inset(30% 0 55% 0); }
+      100% { text-shadow: none; clip-path: none; }
+    }
+
+    /* ════════════════════════════════════════════════════════
+       4. GAME HUD TOP NAV
+    ════════════════════════════════════════════════════════ */
+    .game-hud {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      padding: 0 28px; height: 74px;
+      display: flex; align-items: center; justify-content: space-between;
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      background: var(--hud-bg); border-bottom: 2px solid var(--border);
+      box-shadow: var(--shadow); transition: all 0.3s ease;
+    }
+
+    .hud-player {
+      display: flex; align-items: center; gap: 14px;
+    }
+    .player-avatar {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; color: #fff; font-size: 1.1rem;
+      border: 2px solid var(--text); box-shadow: 0 4px 12px var(--purple-glow);
+    }
+    .player-meta { display: flex; flex-direction: column; gap: 2px; }
+    .player-name { font-weight: 800; font-size: 0.95rem; font-family: 'Space Grotesk', sans-serif; }
+    .player-lvl { font-size: 0.65rem; color: var(--purple); font-weight: 700; letter-spacing: 0.05em; }
+
+    .hud-stats { display: flex; align-items: center; gap: 20px; }
+    .vibe-meter-box {
+      display: flex; flex-direction: column; gap: 4px; min-width: 140px;
+    }
+    .vibe-meter-label {
+      display: flex; justify-content: space-between; font-size: 0.65rem;
+      font-family: 'Fira Code', monospace; color: var(--text-muted); font-weight: 600;
+    }
+    .vibe-bar-track {
+      height: 8px; width: 100%; border-radius: 99px; background: rgba(0, 0, 0, 0.1);
+      border: 1px solid var(--border); overflow: hidden; position: relative;
+    }
+    .vibe-bar-fill {
+      height: 100%; border-radius: 99px;
+      background: linear-gradient(90deg, var(--purple), var(--cyan), var(--emerald));
+      width: 99%; transition: width 0.4s ease;
+    }
+
+    .hud-actions { display: flex; align-items: center; gap: 12px; }
+
+    .hud-btn {
+      padding: 8px 14px; border-radius: 10px;
+      background: var(--surface); border: 1.5px solid var(--border);
+      color: var(--text); font-size: 0.8rem; font-weight: 700;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .hud-btn:hover {
+      background: var(--surface-hover); border-color: var(--purple);
+      transform: translateY(-2px); box-shadow: 0 4px 15px var(--purple-glow);
+    }
+
+    .theme-switcher-btn {
+      padding: 8px 16px; border-radius: 99px;
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      color: #ffffff; font-weight: 800; font-size: 0.8rem;
+      display: inline-flex; align-items: center; gap: 6px;
+      box-shadow: 0 4px 15px var(--purple-glow); transition: all 0.25s ease;
+    }
+    .theme-switcher-btn:hover { transform: translateY(-2px) scale(1.04); }
+
+    /* ════════════════════════════════════════════════════════
+       5. HERO SECTION
+    ════════════════════════════════════════════════════════ */
+    #hero {
+      position: relative; min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 120px 24px 60px; z-index: 2;
+    }
+    .hero-container {
+      max-width: 980px; width: 100%; text-align: center;
+      position: relative; z-index: 10; pointer-events: none;
+    }
+    .hero-container * { pointer-events: auto; }
+
+    .game-start-pill {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 8px 22px; border-radius: 99px;
+      background: var(--card-bg); border: 2px solid var(--border);
+      font-size: 0.72rem; font-family: 'Press Start 2P', monospace; color: var(--purple);
+      margin-bottom: 28px; box-shadow: var(--shadow);
+    }
+    .blink-text { animation: blink 1.5s infinite; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    .hero-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(3rem, 8.5vw, 6.5rem); font-weight: 800;
+      line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 24px;
+    }
+    .hero-title .name-text { color: var(--text); }
+    .hero-title .vibe-text {
+      background: linear-gradient(135deg, var(--purple), var(--cyan), var(--pink));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-size: 200% auto; animation: shineGrad 6s linear infinite;
+    }
+    @keyframes shineGrad { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
+
+    .hero-subtitle {
+      font-size: clamp(1.1rem, 2vw, 1.35rem); color: var(--text-muted);
+      max-width: 660px; margin: 0 auto 36px; line-height: 1.7; font-weight: 500;
+    }
+    .hero-subtitle strong { color: var(--text); font-weight: 700; }
+
+    .hero-game-hint {
+      margin-bottom: 30px; font-family: 'Fira Code', monospace; font-size: 0.8rem;
+      color: var(--cyan); background: var(--surface); padding: 8px 18px; border-radius: 99px;
+      display: inline-block; border: 1px solid var(--border);
+    }
+
+    .hero-buttons { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
+
+    .btn-game-primary {
+      padding: 16px 38px; border-radius: 14px;
+      background: linear-gradient(135deg, var(--purple), #4f46e5);
+      color: #ffffff; font-weight: 800; font-size: 1rem;
+      border: 2px solid #ffffff; box-shadow: 0 8px 25px var(--purple-glow);
+      transition: all 0.25s ease; display: inline-flex; align-items: center; gap: 10px;
+    }
+    .btn-game-primary:hover {
+      transform: translateY(-3px); box-shadow: 0 12px 35px var(--purple-glow);
+    }
+
+    .btn-game-secondary {
+      padding: 15px 34px; border-radius: 14px;
+      background: var(--card-bg); border: 2px solid var(--border);
+      color: var(--text); font-weight: 700; font-size: 1rem;
+      backdrop-filter: blur(10px); transition: all 0.25s ease;
+      display: inline-flex; align-items: center; gap: 8px; box-shadow: var(--shadow);
+    }
+    .btn-game-secondary:hover {
+      background: var(--surface-hover); border-color: var(--border-glow);
+      transform: translateY(-2px);
+    }
+
+    /* ════════════════════════════════════════════════════════
+       6. INTERACTIVE TERMINAL
+    ════════════════════════════════════════════════════════ */
+    .terminal-section { padding: 40px 24px; position: relative; z-index: 10; }
+    .terminal-box {
+      max-width: 880px; margin: 0 auto; border-radius: 20px;
+      background: #090919; border: 2px solid var(--border);
+      box-shadow: var(--shadow); overflow: hidden; font-family: 'Fira Code', monospace;
+    }
+    .terminal-header {
+      background: rgba(255, 255, 255, 0.05); padding: 12px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .terminal-dots { display: flex; gap: 8px; }
+    .tdot { width: 11px; height: 11px; border-radius: 50%; }
+    .td-red { background: #ff5f56; } .td-yellow { background: #ffbd2e; } .td-green { background: #27c93f; }
+    .terminal-title { font-size: 0.75rem; color: #94a3b8; }
+
+    .terminal-body {
+      padding: 20px; min-height: 200px; max-height: 300px; overflow-y: auto;
+      color: #e2e8f0; font-size: 0.88rem; line-height: 1.6;
+    }
+    .term-line { margin-bottom: 8px; word-break: break-word; }
+    .term-prompt { color: #38bdf8; font-weight: 600; }
+    .term-cmd { color: #f471b5; }
+    .term-res { color: #cbd5e1; }
+    .term-success { color: #34d399; }
+    .term-input-row { display: flex; align-items: center; gap: 8px; padding: 0 20px 16px; }
+    .term-input {
+      flex: 1; background: transparent; border: none; outline: none;
+      color: #f8fafc; font-family: inherit; font-size: 0.88rem;
+    }
+
+    .quick-cmds {
+      padding: 12px 20px; background: rgba(255, 255, 255, 0.02);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 0.75rem;
+    }
+    .cmd-chip {
+      padding: 4px 12px; border-radius: 8px; background: rgba(255, 255, 255, 0.06);
+      color: #67e8f9; cursor: pointer; transition: all 0.2s; border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .cmd-chip:hover { background: var(--purple); color: #fff; border-color: var(--purple); }
+
+    /* ════════════════════════════════════════════════════════
+       7. STATS & ACHIEVEMENTS SECTION
+    ════════════════════════════════════════════════════════ */
+    .stats-section { padding: 40px 24px; position: relative; z-index: 5; }
+    .stats-grid {
+      max-width: 1100px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;
+    }
+    .stat-card {
+      padding: 28px; border-radius: 20px;
+      background: var(--card-bg); border: 1.5px solid var(--border);
+      box-shadow: var(--shadow); text-align: center;
+      transition: transform 0.25s ease, border-color 0.25s;
+    }
+    .stat-card:hover { transform: translateY(-4px); border-color: var(--purple); }
+    .stat-number {
+      font-family: 'Space Grotesk', sans-serif; font-size: 2.8rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--text), var(--purple));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px;
+    }
+    .stat-label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+
+    /* ════════════════════════════════════════════════════════
+       8. SECTION HEADERS & FLAT CARDS
+    ════════════════════════════════════════════════════════ */
+    section { padding: 90px 24px; position: relative; z-index: 5; }
+    .section-header { max-width: 1100px; margin: 0 auto 50px; text-align: left; }
+    .section-subtitle {
+      font-family: 'Press Start 2P', monospace; font-size: 0.68rem; color: var(--cyan);
+      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif; font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 800; letter-spacing: -0.02em; line-height: 1.15;
+    }
+
+    /* ════════════════════════════════════════════════════════
+       9. NEW HIGH-TECH HOLOGRAPHIC DEVELOPER BADGE (REPLACED OLD BOX)
+    ════════════════════════════════════════════════════════ */
+    .about-grid {
+      max-width: 1100px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1.3fr; gap: 60px; align-items: center;
+    }
+    
+    .tech-badge-card {
+      width: 100%; max-width: 380px; margin: 0 auto; border-radius: 28px;
+      background: var(--card-bg); border: 2px solid var(--purple);
+      padding: 32px 24px; position: relative; overflow: hidden;
+      box-shadow: 0 20px 50px var(--purple-glow); display: flex; flex-direction: column; gap: 20px;
+    }
+    .badge-top-row {
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border); padding-bottom: 14px;
+    }
+    .badge-status {
+      display: flex; align-items: center; gap: 8px; font-family: 'Fira Code', monospace;
+      font-size: 0.72rem; color: var(--emerald); font-weight: 700;
+    }
+    .badge-chip {
+      font-family: 'Press Start 2P', monospace; font-size: 0.55rem; color: var(--cyan);
+      background: var(--surface); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border);
+    }
+    .badge-avatar-wrap {
+      display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px;
+    }
+    .badge-avatar-ring {
+      width: 90px; height: 90px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--cyan), var(--pink));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Space Grotesk', sans-serif; font-size: 2.5rem; font-weight: 800; color: #fff;
+      box-shadow: 0 0 30px var(--purple-glow); border: 3px solid var(--text);
+    }
+    .badge-dev-name { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-weight: 800; }
+    .badge-dev-role { font-family: 'Fira Code', monospace; font-size: 0.8rem; color: var(--purple); font-weight: 600; }
+
+    /* Social Media Links Bar Inside Badge */
+    .badge-socials {
+      display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 6px;
+    }
+    .social-ic-btn {
+      width: 42px; height: 42px; border-radius: 12px; background: var(--surface);
+      border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; transition: all 0.25s ease; color: var(--text);
+    }
+    .social-ic-btn:hover {
+      background: var(--purple); border-color: var(--purple); color: #fff;
+      transform: translateY(-3px); box-shadow: 0 4px 15px var(--purple-glow);
+    }
+
+    .about-content p { font-size: 1.05rem; color: var(--text-muted); line-height: 1.8; margin-bottom: 24px; }
+    .about-content strong { color: var(--text); }
+
+    .info-list { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 30px; }
+    .info-item {
+      padding: 16px; border-radius: 14px; background: var(--card-bg); border: 1.5px solid var(--border);
+      box-shadow: var(--shadow); transition: border-color 0.25s;
+    }
+    .info-item:hover { border-color: var(--purple); }
+    .info-item-label { font-size: 0.72rem; font-family: 'Press Start 2P', monospace; color: var(--cyan); margin-bottom: 6px; }
+    .info-item-val { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+
+    /* ════════════════════════════════════════════════════════
+       10. CAREER CAMPAIGN TIMELINE
+    ════════════════════════════════════════════════════════ */
+    .timeline { max-width: 900px; margin: 0 auto; position: relative; padding-left: 32px; }
+    .timeline::before {
+      content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px;
+      background: linear-gradient(to bottom, var(--purple), var(--cyan), var(--pink));
+    }
+    .timeline-item { position: relative; margin-bottom: 40px; }
+    .timeline-dot {
+      position: absolute; left: -39px; top: 6px; width: 16px; height: 16px; border-radius: 4px;
+      background: var(--purple); border: 2px solid var(--text); box-shadow: 0 0 12px var(--purple);
+    }
+    .timeline-card {
+      padding: 26px; border-radius: 20px; background: var(--card-bg); border: 1.5px solid var(--border);
+      box-shadow: var(--shadow); transition: transform 0.25s ease, border-color 0.25s;
+    }
+    .timeline-card:hover { transform: translateY(-4px); border-color: var(--purple); }
+    .timeline-date { font-family: 'Press Start 2P', monospace; font-size: 0.68rem; color: var(--cyan); margin-bottom: 10px; }
+    .timeline-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 800; margin-bottom: 4px; }
+    .timeline-org { font-size: 0.9rem; color: var(--text-dim); margin-bottom: 12px; font-weight: 600; }
+    .timeline-desc { font-size: 0.95rem; color: var(--text-muted); line-height: 1.6; }
+
+    /* ════════════════════════════════════════════════════════
+       11. SKILL TREE / WHAT I LEARN CARDS
+    ════════════════════════════════════════════════════════ */
+    .skills-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;
+    }
+    .skill-card {
+      position: relative; padding: 28px; border-radius: 22px;
+      background: var(--card-bg); border: 1.5px solid var(--border);
+      box-shadow: var(--shadow); overflow: hidden;
+      transition: transform 0.25s ease, border-color 0.25s;
+    }
+    .skill-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--purple), var(--cyan), var(--pink));
+      opacity: 0; transition: opacity 0.3s ease;
+    }
+    .skill-card:hover {
+      transform: translateY(-5px); border-color: var(--purple);
+      box-shadow: 0 16px 36px var(--purple-glow);
+    }
+    .skill-card:hover::before { opacity: 1; }
+
+    .skill-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .skill-title-group { display: flex; align-items: center; gap: 12px; }
+    .skill-icon { font-size: 2.2rem; transition: transform 0.3s ease; }
+    .skill-card:hover .skill-icon { transform: scale(1.2) rotate(5deg); }
+    .skill-name { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 1.1rem; }
+
+    .skill-badge {
+      padding: 4px 10px; border-radius: 6px; font-size: 0.65rem;
+      font-family: 'Press Start 2P', monospace;
+      background: var(--surface); border: 1px solid var(--border); color: var(--cyan);
+      transition: all 0.3s ease;
+    }
+    .skill-card:hover .skill-badge {
+      background: var(--purple); color: #fff; border-color: var(--purple);
+    }
+
+    .skill-bar-track {
+      height: 8px; width: 100%; border-radius: 99px; background: rgba(0, 0, 0, 0.08);
+      overflow: hidden; margin-bottom: 16px; position: relative; border: 1px solid var(--border);
+    }
+    .skill-bar-fill {
+      height: 100%; border-radius: 99px;
+      background: linear-gradient(90deg, var(--purple), var(--cyan));
+      width: 0%; transition: width 1.2s ease;
+    }
+
+    .skill-topics { display: flex; gap: 6px; flex-wrap: wrap; }
+    .stopic {
+      padding: 4px 8px; border-radius: 6px; font-size: 0.7rem;
+      font-family: 'Fira Code', monospace; color: var(--text-dim);
+      background: var(--surface); border: 1px solid var(--border);
+    }
+
+    /* ════════════════════════════════════════════════════════
+       12. QUEST LOG / PROJECTS SECTION
+    ════════════════════════════════════════════════════════ */
+    .filter-bar {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 40px;
+    }
+    .filter-btn {
+      padding: 10px 22px; border-radius: 12px; background: var(--card-bg);
+      border: 1.5px solid var(--border); color: var(--text-muted); font-size: 0.85rem; font-weight: 700;
+      transition: all 0.25s ease; box-shadow: var(--shadow);
+    }
+    .filter-btn.active, .filter-btn:hover {
+      background: var(--purple); color: #fff; border-color: var(--purple);
+      box-shadow: 0 4px 15px var(--purple-glow);
+    }
+
+    .projects-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 28px;
+    }
+    .proj-card {
+      border-radius: 24px; background: var(--card-bg); border: 1.5px solid var(--border);
+      overflow: hidden; box-shadow: var(--shadow);
+      transition: transform 0.3s ease, border-color 0.3s;
+      display: flex; flex-direction: column;
+    }
+    .proj-card:hover {
+      transform: translateY(-6px); border-color: var(--purple);
+      box-shadow: 0 20px 40px var(--purple-glow);
+    }
+    .proj-preview {
+      height: 200px; background: rgba(0,0,0,0.15); position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .proj-preview img {
+      width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0;
+    }
+    .proj-icon { font-size: 3.8rem; position: relative; z-index: 2; transition: transform 0.3s ease; }
+    .proj-card:hover .proj-icon { transform: scale(1.12); }
+
+    .proj-body { padding: 24px; flex: 1; display: flex; flex-direction: column; }
+    .proj-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .ptag {
+      padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-family: 'Fira Code', monospace;
+      background: var(--surface); border: 1px solid var(--border); color: var(--cyan); font-weight: 600;
+    }
+    .proj-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.35rem; font-weight: 800; margin-bottom: 8px; }
+    .proj-desc { font-size: 0.92rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px; flex: 1; }
+    .proj-links { display: flex; align-items: center; gap: 12px; }
+    .plink-btn {
+      padding: 10px 18px; border-radius: 10px; background: var(--surface); border: 1.5px solid var(--border);
+      font-size: 0.85rem; font-weight: 700; color: var(--text); display: inline-flex; align-items: center; gap: 6px;
+      transition: all 0.2s;
+    }
+    .plink-btn:hover { background: var(--purple); border-color: var(--purple); color: #fff; }
+
+    /* ════════════════════════════════════════════════════════
+       13. GUILD / CONTACT SECTION WITH SOCIAL MEDIA BUTTONS
+    ════════════════════════════════════════════════════════ */
+    .contact-box {
+      max-width: 900px; margin: 0 auto; border-radius: 32px;
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(2, 132, 199, 0.1));
+      border: 2px solid var(--border); padding: 50px 30px; text-align: center;
+      position: relative; overflow: hidden; box-shadow: var(--shadow);
+    }
+    .contact-box h2 { font-family: 'Space Grotesk', sans-serif; font-size: 2.5rem; font-weight: 800; margin-bottom: 16px; }
+    .contact-box p { color: var(--text-muted); max-width: 520px; margin: 0 auto 36px; font-size: 1.05rem; font-weight: 500; }
+    .contact-actions { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
+
+    .socials-footer-bar {
+      display: flex; justify-content: center; gap: 14px; margin-top: 10px;
+    }
+
+    footer {
+      padding: 40px 24px; border-top: 1px solid var(--border);
+      text-align: center; font-size: 0.85rem; color: var(--text-dim); font-weight: 600;
+    }
+
+    /* ════════════════════════════════════════════════════════
+       14. CMD+K COMMAND PALETTE
+    ════════════════════════════════════════════════════════ */
+    .cmdk-overlay {
+      position: fixed; inset: 0; z-index: 10000; background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(12px); display: flex; align-items: flex-start; justify-content: center;
+      padding-top: 100px; opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .cmdk-overlay.active { opacity: 1; pointer-events: auto; }
+    .cmdk-dialog {
+      width: 100%; max-width: 600px; border-radius: 20px; background: var(--hud-bg);
+      border: 2px solid var(--border); box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+      overflow: hidden; transform: translateY(-15px); transition: transform 0.25s ease;
+    }
+    .cmdk-overlay.active .cmdk-dialog { transform: translateY(0); }
+    .cmdk-input-wrapper {
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .cmdk-input {
+      flex: 1; background: transparent; border: none; outline: none;
+      color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.05rem;
+    }
+    .cmdk-list { max-height: 320px; overflow-y: auto; padding: 12px; }
+    .cmdk-item {
+      padding: 12px 16px; border-radius: 12px; color: var(--text-muted); font-size: 0.9rem;
+      display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .cmdk-item:hover { background: var(--purple); color: #fff; }
+
+    @media (max-width: 768px) {
+      .game-hud { padding: 0 16px; }
+      .vibe-meter-box { display: none; }
+      .about-grid { grid-template-columns: 1fr; }
+      #cursor-dot, #cursor-ring { display: none; }
+      body { cursor: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Custom Game Cursor -->
+  <div id="cursor-dot"></div>
+  <div id="cursor-ring"></div>
+
+  <!-- Background Grid & Playable Hero Mini-Game Canvas -->
+  <div class="bg-grid-pattern"></div>
+  <div class="bg-canvas-container">
+    <div class="top-light-beam"></div>
+    <div class="top-light-spot"></div>
+    <canvas id="hero-game-canvas"></canvas>
+  </div>
+
+  <!-- Game HUD Top Bar -->
+  <header class="game-hud">
+    <div class="hud-player">
+      <div class="player-avatar" id="hud-avatar-box">
+        <img id="hud-avatar-img" src="" alt="Sujal" style="width:100%; height:100%; border-radius:50%; object-fit:cover; display:none;" />
+        <span id="hud-avatar-initials">SS</span>
+      </div>
+      <div class="player-meta">
+        <div class="player-name" id="dyn-prof-name">SUJAL SOLANKI</div>
+        <div class="player-lvl">LEVEL 99 VIBE CODER</div>
+      </div>
+    </div>
+
+    <div class="hud-stats">
+      <div class="vibe-meter-box">
+        <div class="vibe-meter-label">
+          <span>VIBE ENERGY</span>
+          <span id="xp-counter">9999 / 9999 XP</span>
+        </div>
+        <div class="vibe-bar-track">
+          <div class="vibe-bar-fill" id="vibe-bar"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hud-actions">
+      <!-- Search Cmd+K -->
+      <button class="hud-btn" id="open-cmdk">
+        <span>Search</span>
+        <span style="font-family:'Fira Code'; font-size:0.7rem; color:var(--cyan)">⌘K</span>
+      </button>
+
+      <!-- Sound FX Toggle -->
+      <button class="hud-btn" id="sound-toggle" title="Toggle Sound FX">
+        <span id="sound-icon">🔊 SOUND ON</span>
+      </button>
+
+      <!-- DAY / NIGHT THEME SWITCHER (DEFAULT DAY!) -->
+      <button class="theme-switcher-btn" id="theme-switcher" title="Toggle Day / Night Mode">
+        <span id="theme-icon">☀️ DAY MODE</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section id="hero">
+    <div class="hero-container">
+      <div class="game-start-pill">
+        <span class="blink-text">PRESS START</span> &nbsp;•&nbsp; PLAYER 1 READY
+      </div>
+
+      <h1 class="hero-title">
+        <span class="name-text" id="hero-dyn-name">Sujal Solanki</span><br />
+        <span class="vibe-text glitch">Vibe Coder.</span>
+      </h1>
+
+      <p class="hero-subtitle" id="hero-dyn-sub">
+        Building high-impact digital experiences where <strong>arcade aesthetics</strong> meet <strong>flawless web engineering</strong>.
+      </p>
+
+      <div class="hero-game-hint">
+        🕹️ Move cursor over hero background to catch glowing skill orbs!
+      </div>
+
+      <div class="hero-buttons">
+        <a href="#projects" class="btn-game-primary">
+          <span>Explore Quests</span>
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#contact" class="btn-game-secondary">
+          <span>Hire Player 1</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Live Terminal Section -->
+  <section id="terminal" class="terminal-section">
+    <div class="terminal-box">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <div class="tdot td-red"></div>
+          <div class="tdot td-yellow"></div>
+          <div class="tdot td-green"></div>
+        </div>
+        <div class="terminal-title">sujal@vibecoder:~ (zsh arcade)</div>
+        <div style="width: 30px;"></div>
+      </div>
+
+      <div class="terminal-body" id="term-output">
+        <div class="term-line"><span class="term-success">✓ Arcade Vibe Terminal v3.0 initialized.</span></div>
+        <div class="term-line">Type <span class="term-cmd">'help'</span> or click quick action chips below to execute commands.</div>
+      </div>
+
+      <div class="term-input-row">
+        <span class="term-prompt">sujal@vibecoder:~$</span>
+        <input type="text" class="term-input" id="term-input" placeholder="Type command..." autocomplete="off" />
+      </div>
+
+      <div class="quick-cmds">
+        <span style="color: #64748b;">Cheat Codes:</span>
+        <span class="cmd-chip" onclick="runTermCmd('help')">help</span>
+        <span class="cmd-chip" onclick="runTermCmd('about')">about</span>
+        <span class="cmd-chip" onclick="runTermCmd('skills')">skills</span>
+        <span class="cmd-chip" onclick="runTermCmd('contact')">contact</span>
+        <span class="cmd-chip" onclick="runTermCmd('matrix')">matrix</span>
+        <span class="cmd-chip" onclick="runTermCmd('sudo hire')">sudo hire</span>
+        <span class="cmd-chip" onclick="runTermCmd('clear')">clear</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Player Stats Section -->
+  <div class="stats-section">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number" data-count="12">0</div>
+        <div class="stat-label">Quests Completed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" data-count="100">0</div>
+        <div class="stat-label">% Vibe Energy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" data-count="2">0</div>
+        <div class="stat-label">Years Leveling Up</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" data-count="24">0</div>
+        <div class="stat-label">7 Support &amp; Freelance</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- About Player Section (NEW HOLOGRAPHIC TECH BADGE) -->
+  <section id="about">
+    <div class="section-header">
+      <div class="section-subtitle">Character Lore</div>
+      <h2 class="section-title">Driven by passion, <br /><span style="color: var(--cyan);">backed by clean code.</span></h2>
+    </div>
+
+    <div class="about-grid">
+      <!-- REPLACED OLD BOX WITH NEW SLEEK HOLOGRAPHIC DEVELOPER ID BADGE -->
+      <div class="about-visual">
+        <div class="tech-badge-card">
+          <div class="badge-top-row">
+            <div class="badge-status">
+              <span class="live-dot"></span> ONLINE
+            </div>
+            <div class="badge-chip">ID: SS-7719</div>
+          </div>
+
+          <div class="badge-avatar-wrap">
+            <div class="badge-avatar-ring" id="badge-avatar-ring">
+              <img id="badge-avatar-img" src="" alt="Sujal Solanki" style="width:100%; height:100%; border-radius:50%; object-fit:cover; display:none;" />
+              <span id="badge-avatar-initials">SS</span>
+            </div>
+            <div class="badge-dev-name" id="badge-dyn-name">Sujal Solanki</div>
+            <div class="badge-dev-role">VIBE CODER // FREELANCE</div>
+          </div>
+
+          <!-- Integrated Official Social Media Buttons -->
+          <div class="badge-socials">
+            <a href="https://github.com/sujalsolanki" target="_blank" class="social-ic-btn" id="social-gh" title="GitHub">
+              <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            </a>
+            <a href="https://linkedin.com/in/sujalsolanki" target="_blank" class="social-ic-btn" id="social-li" title="LinkedIn">
+              <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+            <a href="https://instagram.com/sujalsolanki" target="_blank" class="social-ic-btn" id="social-insta" title="Instagram">
+              <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            </a>
+            <a href="https://x.com/sujalsolanki" target="_blank" class="social-ic-btn" id="social-tw" title="Twitter / X">
+              <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="about-content">
+        <p>
+          I am <strong id="about-dyn-name">Sujal Solanki</strong>, a passionate <strong>Vibe Coder</strong> and freelance web developer pursuing my <strong>Bachelor in Computer Applications (BCA)</strong> at Lucky Institute of Professional Studies.
+        </p>
+        <p>
+          I build high-end web platforms, full-stack applications, and interactive user interfaces. My mission is simple: deliver clean code, beautiful responsive designs, and unforgettable user experiences.
+        </p>
+
+        <div class="info-list">
+          <div class="info-item">
+            <div class="info-item-label">INSTITUTION</div>
+            <div class="info-item-val" id="dyn-college">Lucky Institute of Professional Studies</div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-label">DEGREE</div>
+            <div class="info-item-val" id="dyn-degree">BCA (Computer Applications)</div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-label">EMAIL</div>
+            <div class="info-item-val" id="dyn-email">sujalsolanki7719801@gmail.com</div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-label">PHONE</div>
+            <div class="info-item-val" id="dyn-phone">+91 9079199951</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Career Campaign Timeline -->
+  <section id="experience">
+    <div class="section-header">
+      <div class="section-subtitle">Campaign Mode</div>
+      <h2 class="section-title">Education &amp; Experience <br /><span style="color: var(--purple);">milestones.</span></h2>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <div class="timeline-date">STAGE 1 • 2022 — PRESENT</div>
+          <h3 class="timeline-title">BCA (Bachelor in Computer Applications)</h3>
+          <div class="timeline-org">Lucky Institute of Professional Studies</div>
+          <p class="timeline-desc">Mastering computer science fundamentals, algorithms, data structures, database architecture, and web engineering principles.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-card">
+          <div class="timeline-date">STAGE 2 • 2023 — PRESENT</div>
+          <h3 class="timeline-title">Freelance Full-Stack Developer</h3>
+          <div class="timeline-org">Self-Employed · Global Clients</div>
+          <p class="timeline-desc">Designing and deploying custom web applications, SaaS platforms, e-commerce systems, and interactive UI experiences for clients worldwide.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skill Tree / What I Learn Cards -->
+  <section id="skills">
+    <div class="section-header">
+      <div class="section-subtitle">Skill Tree Matrix</div>
+      <h2 class="section-title">What I Learn &amp; Master <br /><span style="color: var(--purple);">every single day.</span></h2>
+    </div>
+
+    <div class="skills-grid" id="dyn-skills-grid"></div>
+  </section>
+
+  <!-- Quest Log / Projects Section -->
+  <section id="projects">
+    <div class="section-header">
+      <div class="section-subtitle">Completed Quests</div>
+      <h2 class="section-title">Featured Projects <br /><span style="color: var(--cyan);">built to impress.</span></h2>
+    </div>
+
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">All Quests</button>
+      <button class="filter-btn" data-filter="fullstack">Fullstack</button>
+      <button class="filter-btn" data-filter="ai">AI Bosses</button>
+      <button class="filter-btn" data-filter="frontend">Frontend / UI</button>
+    </div>
+
+    <div class="projects-grid" id="dyn-projects-grid"></div>
+  </section>
+
+  <!-- Guild / Contact Section -->
+  <section id="contact">
+    <div class="contact-box">
+      <h2>Recruit Player 1 <br /><span style="color: var(--cyan);">for your next quest.</span></h2>
+      <p>Have a project in mind, need a freelance web developer, or want to collaborate? Send a party invite!</p>
+
+      <div class="contact-actions">
+        <a href="mailto:sujalsolanki7719801@gmail.com" class="btn-game-primary" id="btn-dyn-email">
+          <span>Email Me Directly</span>
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="m22 6-10 7L2 6"/></svg>
+        </a>
+        <a href="tel:+919079199951" class="btn-game-secondary" id="btn-dyn-phone">
+          <span>Call: +91 9079199951</span>
+        </a>
+      </div>
+
+      <!-- Social Media Bar in Contact Footer -->
+      <div class="socials-footer-bar">
+        <a href="https://github.com/sujalsolanki" target="_blank" class="social-ic-btn" id="social-footer-gh" title="GitHub">🐙</a>
+        <a href="https://linkedin.com/in/sujalsolanki" target="_blank" class="social-ic-btn" id="social-footer-li" title="LinkedIn">💼</a>
+        <a href="https://instagram.com/sujalsolanki" target="_blank" class="social-ic-btn" id="social-footer-insta" title="Instagram">📸</a>
+        <a href="https://x.com/sujalsolanki" target="_blank" class="social-ic-btn" id="social-footer-tw" title="Twitter / X">🐦</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2026 Sujal Solanki. Crafted with Vibe Energy &amp; Arcade Magic.</p>
+  </footer>
+
+  <!-- Cmd+K Command Palette Modal -->
+  <div class="cmdk-overlay" id="cmdk-modal">
+    <div class="cmdk-dialog">
+      <div class="cmdk-input-wrapper">
+        <span style="color: var(--purple);">🔍</span>
+        <input type="text" class="cmdk-input" id="cmdk-search" placeholder="Type a command or search section..." />
+        <span style="font-family:'Press Start 2P'; font-size:0.6rem; color:var(--cyan)">ESC</span>
+      </div>
+      <div class="cmdk-list" id="cmdk-items">
+        <div class="cmdk-item" onclick="cmdkNavigate('#hero')">
+          <span>🏠 Go to Home / Game Start</span>
+          <span style="color:var(--cyan)">Hero</span>
+        </div>
+        <div class="cmdk-item" onclick="cmdkNavigate('#about')">
+          <span>👤 Character Lore</span>
+          <span style="color:var(--cyan)">Bio</span>
+        </div>
+        <div class="cmdk-item" onclick="cmdkNavigate('#experience')">
+          <span>📜 Campaign Milestones</span>
+          <span style="color:var(--cyan)">Timeline</span>
+        </div>
+        <div class="cmdk-item" onclick="cmdkNavigate('#skills')">
+          <span>⚡ View Skill Tree</span>
+          <span style="color:var(--cyan)">Skills</span>
+        </div>
+        <div class="cmdk-item" onclick="cmdkNavigate('#projects')">
+          <span>🚀 Explore Completed Quests</span>
+          <span style="color:var(--cyan)">Projects</span>
+        </div>
+        <div class="cmdk-item" onclick="cmdkNavigate('#terminal')">
+          <span>💻 Open Arcade Terminal</span>
+          <span style="color:var(--cyan)">CLI</span>
+        </div>
+        <div class="cmdk-item" onclick="cmdkNavigate('#contact')">
+          <span>✉️ Party Invite / Contact Sujal</span>
+          <span style="color:var(--cyan)">Contact</span>
+        </div>
+        <div class="cmdk-item" onclick="toggleTheme()">
+          <span>🌓 Toggle Day / Night Mode</span>
+          <span style="color:var(--cyan)">Theme</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Core -->
+  <script>
+    const DEFAULT_DATA = {
+      profile: {
+        name: "Sujal Solanki",
+        title: "Vibe Coder & Freelance Developer",
+        email: "sujalsolanki7719801@gmail.com",
+        phone: "+91 9079199951",
+        college: "Lucky Institute of Professional Studies",
+        degree: "BCA (Bachelor in Computer Applications)",
+        github: "https://github.com/sujalsolanki",
+        linkedin: "https://linkedin.com/in/sujalsolanki",
+        insta: "https://instagram.com/sujalsolanki",
+        twitter: "https://x.com/sujalsolanki"
+      },
+      projects: [
+        { id: 1, title: "Next-Gen E-Commerce", category: "fullstack", desc: "High-performance full-stack online store with real-time cart, checkout, and slick product interactions.", icon: "🛍️", img: "", tags: ["React", "Node.js", "MongoDB"], link: "#" },
+        { id: 2, title: "AI Knowledge Suite", category: "ai", desc: "Intelligent document Q&A assistant with streaming completions, vector search, and workspace memory.", icon: "🤖", img: "", tags: ["Python", "OpenAI", "FastAPI"], link: "#" },
+        { id: 3, title: "Realtime Financial Analytics", category: "frontend", desc: "Clean data dashboard featuring dark/light modes, live websocket data streams, and exportable reports.", icon: "📊", img: "", tags: ["Next.js", "Chart.js", "Tailwind"], link: "#" },
+        { id: 4, title: "VibeChat Workspace", category: "fullstack", desc: "Instant real-time team messaging app with voice channels, file sharing, and dark glassmorphic UI.", icon: "💬", img: "", tags: ["Socket.io", "React", "Express"], link: "#" }
+      ],
+      skills: [
+        { id: 1, name: "React / Next.js", icon: "⚛️", badge: "MAX LEVEL", progress: 92, topics: ["App Router", "SSR / SSG", "Hooks", "State"] },
+        { id: 2, name: "TypeScript", icon: "🔷", badge: "BUFFED", progress: 88, topics: ["Type Safety", "Generics", "Interfaces"] },
+        { id: 3, name: "Tailwind CSS & UI", icon: "🎨", badge: "MASTERED", progress: 95, topics: ["Design Tokens", "Glassmorphism", "Grid"] },
+        { id: 4, name: "Node.js & Express", icon: "🟢", badge: "ADVANCED", progress: 85, topics: ["REST APIs", "Middleware", "JWT"] },
+        { id: 5, name: "Python & AI Integration", icon: "🐍", badge: "SKILLED", progress: 80, topics: ["OpenAI API", "FastAPI", "Automation"] },
+        { id: 6, name: "MongoDB & SQL", icon: "🍃", badge: "ADVANCED", progress: 82, topics: ["Schemas", "Indexing", "Queries"] }
+      ]
+    };
+
+    function getAppData() {
+      const stored = localStorage.getItem('sujal_portfolio_admin_data');
+      if (stored) {
+        try { return JSON.parse(stored); } catch (e) {}
+      }
+      return DEFAULT_DATA;
+    }
+
+    function renderDynamicContent() {
+      const data = getAppData();
+      
+      // Profile & Social Links
+      if (data.profile) {
+        const p = data.profile;
+        document.getElementById('dyn-prof-name').textContent = p.name.toUpperCase();
+        document.getElementById('hero-dyn-name').textContent = p.name;
+        document.getElementById('about-dyn-name').textContent = p.name;
+        document.getElementById('badge-dyn-name').textContent = p.name;
+        document.getElementById('dyn-college').textContent = p.college;
+        document.getElementById('dyn-degree').textContent = p.degree;
+        document.getElementById('dyn-email').textContent = p.email;
+        document.getElementById('dyn-phone').textContent = p.phone;
+        document.getElementById('btn-dyn-email').href = "mailto:" + p.email;
+        document.getElementById('btn-dyn-phone').href = "tel:" + p.phone;
+
+        // Update Social Handles
+        const gh = p.github || 'https://github.com/sujalsolanki';
+        const li = p.linkedin || 'https://linkedin.com/in/sujalsolanki';
+        const insta = p.insta || 'https://instagram.com/sujalsolanki';
+        const tw = p.twitter || 'https://x.com/sujalsolanki';
+
+        document.getElementById('social-gh').href = gh;
+        document.getElementById('social-li').href = li;
+        document.getElementById('social-insta').href = insta;
+        document.getElementById('social-tw').href = tw;
+
+        document.getElementById('social-footer-gh').href = gh;
+        document.getElementById('social-footer-li').href = li;
+        document.getElementById('social-footer-insta').href = insta;
+        document.getElementById('social-footer-tw').href = tw;
+      }
+
+      // Skills
+      const skillsContainer = document.getElementById('dyn-skills-grid');
+      skillsContainer.innerHTML = data.skills.map(s => `
+        <div class="skill-card">
+          <div class="skill-header">
+            <div class="skill-title-group">
+              <span class="skill-icon">${s.icon}</span>
+              <span class="skill-name">${s.name}</span>
+            </div>
+            <span class="skill-badge">${s.badge}</span>
+          </div>
+          <div class="skill-bar-track">
+            <div class="skill-bar-fill" data-progress="${s.progress}%"></div>
+          </div>
+          <div class="skill-topics">
+            ${s.topics.map(t => `<span class="stopic">${t}</span>`).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      // Projects
+      const projectsContainer = document.getElementById('dyn-projects-grid');
+      projectsContainer.innerHTML = data.projects.map(p => `
+        <div class="proj-card" data-category="${p.category}">
+          <div class="proj-preview">
+            ${p.img ? `<img src="${p.img}" alt="${p.title}" />` : `<span class="proj-icon">${p.icon}</span>`}
+          </div>
+          <div class="proj-body">
+            <div class="proj-tags">
+              ${p.tags.map(t => `<span class="ptag">${t}</span>`).join('')}
+            </div>
+            <h3 class="proj-title">${p.title}</h3>
+            <p class="proj-desc">${p.desc}</p>
+            <div class="proj-links">
+              <a href="${p.link}" class="plink-btn" target="_blank">Live Quest ↗</a>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    renderDynamicContent();
+
+    /* ════════════════════════════════════════════════════════
+       1. WEB AUDIO CHIPTUNE SYNTHESIZER
+    ════════════════════════════════════════════════════════ */
+    let soundEnabled = true;
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function playSynthBeep(freq = 440, type = 'square', duration = 0.08) {
+      if (!soundEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new AudioCtx();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    const soundToggleBtn = document.getElementById('sound-toggle');
+    const soundIcon = document.getElementById('sound-icon');
+    soundToggleBtn.addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      soundIcon.textContent = soundEnabled ? '🔊 SOUND ON' : '🔇 MUTE';
+      if (soundEnabled) playSynthBeep(880, 'square');
+    });
+
+    document.querySelectorAll('button, a, .cmd-chip, .filter-btn, .skill-card, .social-ic-btn').forEach(el => {
+      el.addEventListener('mouseenter', () => playSynthBeep(440, 'square', 0.04));
+      el.addEventListener('click', () => playSynthBeep(650, 'triangle', 0.1));
+    });
+
+    /* ════════════════════════════════════════════════════════
+       2. DAY / NIGHT THEME SWITCHER
+    ════════════════════════════════════════════════════════ */
+    const themeSwitcherBtn = document.getElementById('theme-switcher');
+    const themeIcon = document.getElementById('theme-icon');
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'day' ? 'night' : 'day';
+      document.documentElement.setAttribute('data-theme', next);
+      themeIcon.textContent = next === 'day' ? '☀️ DAY MODE' : '🌙 NIGHT MODE';
+      localStorage.setItem('sujal_game_theme', next);
+      playSynthBeep(next === 'day' ? 700 : 350, 'square', 0.12);
+    }
+
+    themeSwitcherBtn.addEventListener('click', toggleTheme);
+
+    const savedTheme = localStorage.getItem('sujal_game_theme') || 'day';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    themeIcon.textContent = savedTheme === 'day' ? '☀️ DAY MODE' : '🌙 NIGHT MODE';
+
+    /* ════════════════════════════════════════════════════════
+       3. CUSTOM CURSOR MOTION
+    ════════════════════════════════════════════════════════ */
+    const cursorDot = document.getElementById('cursor-dot');
+    const cursorRing = document.getElementById('cursor-ring');
+    let mouseX = 0, mouseY = 0;
+    let ringX = 0, ringY = 0;
+
+    window.addEventListener('mousemove', e => {
+      mouseX = e.clientX; mouseY = e.clientY;
+      cursorDot.style.left = mouseX + 'px';
+      cursorDot.style.top = mouseY + 'px';
+    });
+
+    function renderCursorRing() {
+      ringX += (mouseX - ringX) * 0.15;
+      ringY += (mouseY - ringY) * 0.15;
+      cursorRing.style.left = ringX + 'px';
+      cursorRing.style.top = ringY + 'px';
+      requestAnimationFrame(renderCursorRing);
+    }
+    renderCursorRing();
+
+    /* ════════════════════════════════════════════════════════
+       4. HERO PLAYABLE MINI-GAME CANVAS
+    ════════════════════════════════════════════════════════ */
+    const canvas = document.getElementById('hero-game-canvas');
+    const ctx = canvas.getContext('2d');
+    let width = 0, height = 0;
+
+    function resizeCanvas() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    let xpScore = 9999;
+    let skillOrbs = [
+      { x: 200, y: 150, radius: 18, label: 'React', vx: 1.2, vy: 0.8, color: '#0284c7' },
+      { x: 500, y: 220, radius: 20, label: 'Next.js', vx: -1, vy: 1.1, color: '#7c3aed' },
+      { x: 800, y: 180, radius: 16, label: 'TS', vx: 0.9, vy: -0.9, color: '#e11d48' },
+      { x: 350, y: 350, radius: 18, label: 'Node', vx: -1.1, vy: -0.7, color: '#059669' }
+    ];
+
+    function renderHeroGame() {
+      ctx.clearRect(0, 0, width, height);
+
+      skillOrbs.forEach(orb => {
+        orb.x += orb.vx; orb.y += orb.vy;
+        if (orb.x < 30 || orb.x > width - 30) orb.vx *= -1;
+        if (orb.y < 30 || orb.y > height - 30) orb.vy *= -1;
+
+        const dist = Math.hypot(mouseX - orb.x, mouseY - orb.y);
+        if (dist < orb.radius + 15) {
+          orb.vx *= -1.2; orb.vy *= -1.2;
+          xpScore += 10;
+          playSynthBeep(800, 'square', 0.05);
+          document.getElementById('xp-counter').textContent = xpScore + ' / 9999 XP';
+        }
+
+        ctx.beginPath();
+        ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
+        ctx.fillStyle = orb.color;
+        ctx.globalAlpha = 0.85;
+        ctx.fill();
+        ctx.globalAlpha = 1.0;
+
+        ctx.font = '10px "Fira Code", monospace';
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.fillText(orb.label, orb.x, orb.y + 3);
+      });
+
+      requestAnimationFrame(renderHeroGame);
+    }
+    renderHeroGame();
+
+    /* ════════════════════════════════════════════════════════
+       5. INTERACTIVE TERMINAL
+    ════════════════════════════════════════════════════════ */
+    const termInput = document.getElementById('term-input');
+    const termOutput = document.getElementById('term-output');
+
+    const COMMANDS = {
+      help: "Available commands:\n• about    - Sujal's bio & background\n• skills   - Technical stack overview\n• projects - Highlighted quests\n• contact  - Email & Phone info\n• matrix   - Trigger digital matrix mode\n• clear    - Clear terminal log\n• sudo hire- Send priority party invite",
+      about: "Sujal Solanki | Level 99 Vibe Coder & Freelance Developer\nDegree: BCA Scholar at Lucky Institute of Professional Studies\nFocus: Fullstack React/Next.js, Python AI, & Arcade Web UI.",
+      skills: "React, Next.js, TypeScript, Tailwind CSS, Node.js, Python, MongoDB, REST APIs, WebSockets, Figma.",
+      contact: "Email: sujalsolanki7719801@gmail.com\nPhone: +91 9079199951\nStatus: Available for projects & freelance!",
+      "sudo hire": "ACCESS GRANTED 🚀 Direct priority email initialized to sujalsolanki7719801@gmail.com!"
+    };
+
+    function runTermCmd(cmdStr) {
+      const clean = cmdStr.trim().toLowerCase();
+      const cmdLine = document.createElement('div');
+      cmdLine.className = 'term-line';
+      cmdLine.innerHTML = `<span class="term-prompt">sujal@vibecoder:~$</span> <span class="term-cmd">${clean}</span>`;
+      termOutput.appendChild(cmdLine);
+
+      const resLine = document.createElement('div');
+      resLine.className = 'term-line term-res';
+
+      if (clean === 'clear') {
+        termOutput.innerHTML = '';
+        return;
+      } else if (COMMANDS[clean]) {
+        resLine.textContent = COMMANDS[clean];
+      } else {
+        resLine.innerHTML = `<span style="color:#ef4444">Command not recognized: '${clean}'. Type 'help' for list.</span>`;
+      }
+
+      termOutput.appendChild(resLine);
+      termOutput.scrollTop = termOutput.scrollHeight;
+    }
+
+    termInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        runTermCmd(termInput.value);
+        termInput.value = '';
+      }
+    });
+
+    /* ════════════════════════════════════════════════════════
+       6. CMD+K PALETTE
+    ════════════════════════════════════════════════════════ */
+    const cmdkModal = document.getElementById('cmdk-modal');
+    const openCmdkBtn = document.getElementById('open-cmdk');
+    const cmdkSearch = document.getElementById('cmdk-search');
+
+    function toggleCmdk(show) {
+      if (show) {
+        cmdkModal.classList.add('active');
+        cmdkSearch.focus();
+        playSynthBeep(520, 'square');
+      } else {
+        cmdkModal.classList.remove('active');
+      }
+    }
+
+    openCmdkBtn.addEventListener('click', () => toggleCmdk(true));
+
+    window.addEventListener('keydown', e => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        toggleCmdk(!cmdkModal.classList.contains('active'));
+      }
+      if (e.key === 'Escape') toggleCmdk(false);
+    });
+
+    cmdkModal.addEventListener('click', e => {
+      if (e.target === cmdkModal) toggleCmdk(false);
+    });
+
+    function cmdkNavigate(selector) {
+      toggleCmdk(false);
+      const el = document.querySelector(selector);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    /* ════════════════════════════════════════════════════════
+       7. PROJECT CATEGORY FILTER
+    ════════════════════════════════════════════════════════ */
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filter = btn.getAttribute('data-filter');
+
+        document.querySelectorAll('.proj-card').forEach(card => {
+          const category = card.getAttribute('data-category');
+          if (filter === 'all' || category === filter) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    });
+
+    /* ════════════════════════════════════════════════════════
+       8. SCROLL OBSERVERS FOR STATS & SKILL BARS
+    ════════════════════════════════════════════════════════ */
+    const statCards = document.querySelectorAll('.stat-number');
+    const skillFills = document.querySelectorAll('.skill-bar-fill');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          if (entry.target.classList.contains('stat-number')) {
+            const target = parseInt(entry.target.getAttribute('data-count'));
+            let current = 0;
+            const timer = setInterval(() => {
+              current += Math.ceil(target / 20);
+              if (current >= target) {
+                entry.target.textContent = target + '+';
+                clearInterval(timer);
+              } else {
+                entry.target.textContent = current;
+              }
+            }, 50);
+          }
+          if (entry.target.classList.contains('skill-bar-fill')) {
+            entry.target.style.width = entry.target.getAttribute('data-progress');
+          }
+        }
+      });
+    }, { threshold: 0.4 });
+
+    statCards.forEach(c => observer.observe(c));
+    skillFills.forEach(s => observer.observe(s));
+
+    /* ════════════════════════════════════════════════════════
+       9. DYNAMIC ADMIN DATA & PROFILE AVATAR SYNC
+    ════════════════════════════════════════════════════════ */
+    const DEFAULT_AVATAR_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400"><defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%230f172a"/><stop offset="50%" stop-color="%231e1b4b"/><stop offset="100%" stop-color="%23090914"/></linearGradient><linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%238b5cf6"/><stop offset="50%" stop-color="%2306b6d4"/><stop offset="100%" stop-color="%23ec4899"/></linearGradient><linearGradient id="visor" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%2306b6d4"/><stop offset="100%" stop-color="%233b82f6"/></linearGradient></defs><circle cx="200" cy="200" r="190" fill="url(%23bg)" stroke="url(%23accent)" stroke-width="6"/><circle cx="200" cy="200" r="160" fill="none" stroke="%23ffffff" stroke-opacity="0.08" stroke-width="2"/><circle cx="200" cy="200" r="130" fill="none" stroke="%23ffffff" stroke-opacity="0.08" stroke-width="2"/><path d="M80 370 C 80 290, 130 260, 200 260 C 270 260, 320 290, 320 370 Z" fill="%231e293b" stroke="%238b5cf6" stroke-width="3"/><path d="M140 265 L 200 320 L 260 265 Z" fill="%230f172a"/><path d="M200 320 L 200 370" stroke="%2306b6d4" stroke-width="3" stroke-dasharray="4,4"/><rect x="175" y="210" width="50" height="60" rx="10" fill="%23f1f5f9" opacity="0.9"/><rect x="140" y="100" width="120" height="135" rx="60" fill="%23f8fafc"/><rect x="145" y="135" width="110" height="40" rx="12" fill="url(%23visor)"/><path d="M150 155 L 250 155" stroke="%23ffffff" stroke-width="3" opacity="0.8"/><circle cx="170" cy="155" r="4" fill="%23ffffff"/><circle cx="230" cy="155" r="4" fill="%23ffffff"/><rect x="120" y="130" width="20" height="50" rx="10" fill="%238b5cf6"/><rect x="260" y="130" width="20" height="50" rx="10" fill="%238b5cf6"/><path d="M130 130 C 130 70, 270 70, 270 130" fill="none" stroke="%238b5cf6" stroke-width="8" stroke-linecap="round"/><text x="200" y="210" font-family="monospace" font-size="15" font-weight="bold" fill="%2306b6d4" text-anchor="middle">&lt;SUJAL /&gt;</text></svg>`;
+
+    function syncAdminDataToUI() {
+      const raw = localStorage.getItem('sujal_portfolio_admin_data');
+      const data = raw ? JSON.parse(raw) : null;
+      const p = data ? data.profile : null;
+
+      const avatarSrc = (p && p.avatar) ? p.avatar : DEFAULT_AVATAR_SVG;
+
+      // Update HUD Avatar & Profile Avatar Ring
+      const hudImg = document.getElementById('hud-avatar-img');
+      const hudInitials = document.getElementById('hud-avatar-initials');
+      if (hudImg) {
+        hudImg.src = avatarSrc;
+        hudImg.style.display = 'block';
+        if (hudInitials) hudInitials.style.display = 'none';
+      }
+
+      const badgeImg = document.getElementById('badge-avatar-img');
+      const badgeInitials = document.getElementById('badge-avatar-initials');
+      if (badgeImg) {
+        badgeImg.src = avatarSrc;
+        badgeImg.style.display = 'block';
+        if (badgeInitials) badgeInitials.style.display = 'none';
+      }
+
+      if (p) {
+        if (p.name) {
+          const heroName = document.getElementById('hero-dyn-name');
+          const badgeName = document.getElementById('badge-dyn-name');
+          const aboutName = document.getElementById('about-dyn-name');
+          const profName = document.getElementById('dyn-prof-name');
+          if (heroName) heroName.textContent = p.name;
+          if (badgeName) badgeName.textContent = p.name;
+          if (aboutName) aboutName.textContent = p.name;
+          if (profName) profName.textContent = p.name.toUpperCase();
+        }
+        if (p.college) { const el = document.getElementById('dyn-college'); if (el) el.textContent = p.college; }
+        if (p.degree) { const el = document.getElementById('dyn-degree'); if (el) el.textContent = p.degree; }
+        if (p.email) { const el = document.getElementById('dyn-email'); if (el) el.textContent = p.email; }
+        if (p.phone) { const el = document.getElementById('dyn-phone'); if (el) el.textContent = p.phone; }
+
+        if (p.github) { const el = document.getElementById('social-gh'); if (el) el.href = p.github; }
+        if (p.linkedin) { const el = document.getElementById('social-li'); if (el) el.href = p.linkedin; }
+        if (p.insta) { const el = document.getElementById('social-insta'); if (el) el.href = p.insta; }
+        if (p.twitter) { const el = document.getElementById('social-tw'); if (el) el.href = p.twitter; }
+      }
+    }
+
+    syncAdminDataToUI();
+  </script>
+</body>
+</html>

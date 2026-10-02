@@ -1,0 +1,9 @@
+# CodeRabbit Configuration
+language: "en"
+tone_instructions: "Be precise, constructive, and security-focused."
+reviews: "request"
+auto_review:
+  enabled: true
+  ignore_title_keywords:
+    - "WIP"
+    - "draft"

@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sujal Solanki — Portfolio Admin Dashboard</title>
+  <meta name="description" content="Dedicated Admin Dashboard for managing Sujal Solanki's portfolio projects, skills, social media, and profile info." />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #090914;
+      --surface: #121226;
+      --surface-hover: #1b1b38;
+      --border: rgba(255, 255, 255, 0.1);
+      --purple: #8b5cf6;
+      --purple-glow: rgba(139, 92, 246, 0.4);
+      --cyan: #06b6d4;
+      --pink: #ec4899;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; display: flex; flex-direction: column;
+    }
+
+    /* Auth Login Overlay */
+    #auth-overlay {
+      position: fixed; inset: 0; z-index: 10000;
+      background: var(--bg); display: flex; align-items: center; justify-content: center;
+      padding: 20px; transition: opacity 0.3s ease;
+    }
+    .auth-box {
+      width: 100%; max-width: 400px; padding: 40px 32px;
+      border-radius: 24px; background: var(--surface); border: 1px solid var(--border);
+      box-shadow: 0 25px 60px rgba(0,0,0,0.6); text-align: center;
+    }
+    .auth-title {
+      font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; font-weight: 800;
+      margin-bottom: 24px; color: var(--text);
+    }
+    .auth-form { display: flex; flex-direction: column; gap: 16px; text-align: left; }
+    .auth-group { display: flex; flex-direction: column; gap: 6px; }
+    .auth-group label {
+      font-size: 0.75rem; font-weight: 700; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .auth-input {
+      padding: 14px 16px; border-radius: 12px; background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border); color: var(--text); font-family: inherit; font-size: 0.95rem;
+      outline: none; transition: border-color 0.2s;
+    }
+    .auth-input:focus { border-color: var(--purple); }
+    .auth-btn {
+      padding: 14px; border-radius: 12px; margin-top: 8px;
+      background: linear-gradient(135deg, var(--purple), #4f46e5); color: #fff;
+      font-weight: 800; font-size: 0.95rem; border: none; cursor: pointer;
+      box-shadow: 0 4px 20px var(--purple-glow); transition: all 0.2s;
+    }
+    .auth-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+    .auth-error {
+      color: #ef4444; font-size: 0.82rem; font-weight: 600; margin-top: 8px;
+      display: none; text-align: center;
+    }
+
+    /* Admin Nav */
+    header {
+      padding: 16px 32px; background: var(--surface); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .admin-logo {
+      font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 800;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .admin-logo span { color: var(--cyan); }
+
+    .admin-actions { display: flex; gap: 12px; }
+    .btn {
+      padding: 10px 20px; border-radius: 10px; font-size: 0.88rem; font-weight: 700;
+      border: 1px solid var(--border); background: var(--surface-hover); color: var(--text);
+      cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn:hover { background: var(--purple); border-color: var(--purple); color: #fff; }
+    .btn-primary { background: var(--purple); border-color: var(--purple); color: #fff; }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-danger { background: #ef4444; border-color: #ef4444; color: #fff; }
+
+    /* Admin Container */
+    .admin-container {
+      max-width: 1200px; width: 100%; margin: 36px auto; padding: 0 24px; flex: 1;
+      display: grid; grid-template-columns: 260px 1fr; gap: 32px;
+    }
+
+    /* Sidebar Tabs */
+    .admin-sidebar {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+      padding: 20px; display: flex; flex-direction: column; gap: 8px; height: fit-content;
+    }
+    .tab-btn {
+      padding: 12px 16px; border-radius: 12px; font-weight: 600; font-size: 0.9rem;
+      color: var(--text-muted); text-align: left; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; gap: 10px; border: none; background: none; width: 100%;
+    }
+    .tab-btn.active, .tab-btn:hover {
+      background: var(--surface-hover); color: var(--text);
+    }
+    .tab-btn.active { border-left: 3.5px solid var(--purple); color: #fff; background: rgba(139, 92, 246, 0.15); }
+
+    /* Main Form Area */
+    .admin-content {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 24px;
+      padding: 32px; display: flex; flex-direction: column; gap: 28px;
+    }
+
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; font-weight: 800;
+      margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .form-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-group.full { grid-column: span 2; }
+
+    label { font-size: 0.82rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    input, textarea, select {
+      padding: 12px 16px; border-radius: 10px; background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border); color: var(--text); font-family: inherit; font-size: 0.95rem;
+      outline: none; transition: border-color 0.2s;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--purple); }
+
+    .items-list { display: flex; flex-direction: column; gap: 16px; margin-top: 10px; }
+    .item-card {
+      padding: 20px; border-radius: 16px; background: rgba(0,0,0,0.25);
+      border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .item-preview {
+      width: 60px; height: 60px; border-radius: 12px; background: rgba(139, 92, 246, 0.2);
+      display: flex; align-items: center; justify-content: center; font-size: 1.8rem;
+      object-fit: cover; overflow: hidden;
+    }
+    .item-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .item-info { flex: 1; }
+    .item-title { font-weight: 700; font-size: 1.05rem; margin-bottom: 4px; }
+    .item-sub { font-size: 0.82rem; color: var(--text-dim); }
+
+    .toast {
+      position: fixed; bottom: 30px; right: 30px; padding: 14px 24px; border-radius: 12px;
+      background: var(--emerald); color: #fff; font-weight: 700; font-size: 0.9rem;
+      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4); opacity: 0; transform: translateY(20px);
+      transition: all 0.3s ease; pointer-events: none; z-index: 9999;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+  <!-- AUTH LOGIN SCREEN OVERLAY -->
+  <div id="auth-overlay">
+    <div class="auth-box">
+      <div class="auth-title">ADMIN ACCESS</div>
+      <form class="auth-form" onsubmit="handleLogin(event)">
+        <div class="auth-group">
+          <label for="admin-id">ID</label>
+          <input type="text" class="auth-input" id="admin-id" autocomplete="off" required />
+        </div>
+
+        <div class="auth-group">
+          <label for="admin-pass">Password</label>
+          <input type="password" class="auth-input" id="admin-pass" autocomplete="off" required />
+        </div>
+
+        <button type="submit" class="auth-btn">Authenticate</button>
+        <div class="auth-error" id="auth-error">Invalid Credentials</div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Header -->
+  <header>
+    <div class="admin-logo">
+      ⚙️ SUJAL PORTFOLIO <span>ADMIN PANEL</span>
+    </div>
+    <div class="admin-actions">
+      <button class="btn" onclick="exportJSON()">📥 Export Backup JSON</button>
+      <button class="btn" onclick="importJSON()">📤 Import JSON</button>
+      <button class="btn btn-danger" onclick="logoutAdmin()">🔒 Logout</button>
+      <a href="index.html" target="_blank" class="btn btn-primary">👁️ View Main Site</a>
+    </div>
+  </header>
+
+  <!-- Admin Layout -->
+  <div class="admin-container">
+    <!-- Sidebar Navigation -->
+    <div class="admin-sidebar">
+      <button class="tab-btn active" onclick="switchTab('tab-projects')">🚀 Manage Projects</button>
+      <button class="tab-btn" onclick="switchTab('tab-skills')">⚡ Skill Tree &amp; Stack</button>
+      <button class="tab-btn" onclick="switchTab('tab-profile')">👤 Profile &amp; Social Links</button>
+    </div>
+
+    <!-- Main Form Content -->
+    <main class="admin-content">
+      
+      <!-- TAB 1: PROJECTS MANAGER -->
+      <div id="tab-projects">
+        <div class="section-title">
+          <span>Manage Portfolio Projects</span>
+          <button class="btn btn-primary" onclick="resetProjectForm()">+ Add New Project</button>
+        </div>
+
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px;">
+          Add or edit projects. Upload custom preview images or select emojis to display on project cards.
+        </p>
+
+        <form id="project-form" style="background: rgba(0,0,0,0.2); padding: 24px; border-radius: 18px; border: 1px solid var(--border); margin-bottom: 30px;" onsubmit="saveProject(event)">
+          <h3 style="margin-bottom: 16px; font-size: 1.1rem;" id="pform-title">Add / Edit Project</h3>
+          <input type="hidden" id="proj-id" />
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Project Title *</label>
+              <input type="text" id="proj-title" placeholder="e.g. Next-Gen E-Commerce" required />
+            </div>
+
+            <div class="form-group">
+              <label>Category *</label>
+              <select id="proj-category" required>
+                <option value="fullstack">Fullstack</option>
+                <option value="ai">AI Tools / Bosses</option>
+                <option value="frontend">Frontend / UI</option>
+              </select>
+            </div>
+
+            <div class="form-group full">
+              <label>Description *</label>
+              <textarea id="proj-desc" placeholder="Brief explanation of the project features & tech stack..." required></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Project Icon Emoji</label>
+              <input type="text" id="proj-icon" placeholder="e.g. 🛍️ or 🤖" value="🚀" />
+            </div>
+
+            <div class="form-group">
+              <label>Upload Custom Image (Optional)</label>
+              <input type="file" id="proj-img-file" accept="image/*" onchange="handleImageUpload(event)" />
+              <input type="hidden" id="proj-img-data" />
+            </div>
+
+            <div class="form-group">
+              <label>Tags (Comma Separated)</label>
+              <input type="text" id="proj-tags" placeholder="e.g. React, Node.js, MongoDB" />
+            </div>
+
+            <div class="form-group">
+              <label>Live Demo URL</label>
+              <input type="text" id="proj-link" placeholder="https://..." />
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px; margin-top: 20px;">
+            <button type="submit" class="btn btn-primary">Save Project</button>
+            <button type="button" class="btn" onclick="resetProjectForm()">Reset Form</button>
+          </div>
+        </form>
+
+        <h3 style="font-size: 1.1rem; margin-bottom: 16px;">Existing Projects</h3>
+        <div class="items-list" id="projects-list"></div>
+      </div>
+
+      <!-- TAB 2: SKILLS MANAGER -->
+      <div id="tab-skills" style="display: none;">
+        <div class="section-title">
+          <span>Manage Technical Stack &amp; Skills</span>
+        </div>
+
+        <form id="skill-form" style="background: rgba(0,0,0,0.2); padding: 24px; border-radius: 18px; border: 1px solid var(--border); margin-bottom: 30px;" onsubmit="saveSkill(event)">
+          <h3 style="margin-bottom: 16px; font-size: 1.1rem;">Add / Edit Skill</h3>
+          <input type="hidden" id="skill-id" />
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Skill Name *</label>
+              <input type="text" id="skill-name" placeholder="e.g. React / Next.js" required />
+            </div>
+            <div class="form-group">
+              <label>Icon Emoji *</label>
+              <input type="text" id="skill-icon" placeholder="e.g. ⚛️" required />
+            </div>
+            <div class="form-group">
+              <label>Proficiency Badge *</label>
+              <input type="text" id="skill-badge" placeholder="e.g. MAX LEVEL or EXPERT" required />
+            </div>
+            <div class="form-group">
+              <label>Progress Level (%) *</label>
+              <input type="number" id="skill-progress" min="10" max="100" placeholder="e.g. 92" required />
+            </div>
+            <div class="form-group full">
+              <label>Topic Pills (Comma Separated)</label>
+              <input type="text" id="skill-topics" placeholder="e.g. App Router, SSR, Hooks, State" />
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px; margin-top: 20px;">
+            <button type="submit" class="btn btn-primary">Save Skill</button>
+            <button type="button" class="btn" onclick="resetSkillForm()">Reset Form</button>
+          </div>
+        </form>
+
+        <h3 style="font-size: 1.1rem; margin-bottom: 16px;">Existing Skills</h3>
+        <div class="items-list" id="skills-list"></div>
+      </div>
+
+      <!-- TAB 3: PROFILE & SOCIAL HANDLES MANAGER -->
+      <div id="tab-profile" style="display: none;">
+        <div class="section-title">
+          <span>Profile Info &amp; Social Media Handles</span>
+        </div>
+
+        <form onsubmit="saveProfile(event)">
+          <h3 style="font-size: 1.05rem; margin-bottom: 16px; color: var(--cyan);">Personal Details</h3>
+          <div class="form-grid" style="margin-bottom: 24px;">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" id="prof-name" value="Sujal Solanki" required />
+            </div>
+            <div class="form-group">
+              <label>Title / Role</label>
+              <input type="text" id="prof-title" value="Vibe Coder & Freelance Developer" required />
+            </div>
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" id="prof-email" value="sujalsolanki7719801@gmail.com" required />
+            </div>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="text" id="prof-phone" value="+91 9079199951" required />
+            </div>
+            <div class="form-group full">
+              <label>Institution / College</label>
+              <input type="text" id="prof-college" value="Lucky Institute of Professional Studies" required />
+            </div>
+            <div class="form-group full">
+              <label>Degree</label>
+              <input type="text" id="prof-degree" value="BCA (Bachelor in Computer Applications)" required />
+            </div>
+          </div>
+
+          <h3 style="font-size: 1.05rem; margin-bottom: 16px; color: var(--cyan); margin-top: 24px;">Official Developer Avatar / Profile Picture (PP)</h3>
+          <div style="display: flex; align-items: center; gap: 24px; margin-bottom: 28px; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 16px; border: 1px solid var(--border);">
+            <div style="position: relative; width: 90px; height: 90px; border-radius: 50%; overflow: hidden; border: 3px solid var(--purple); background: var(--surface); flex-shrink: 0; box-shadow: 0 0 20px var(--purple-glow);">
+              <img id="admin-avatar-preview" src="" alt="Profile Preview" style="width: 100%; height: 100%; object-fit: cover;" />
+            </div>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 10px;">
+              <div>
+                <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 6px;">Upload Custom Photo (Base64)</label>
+                <input type="file" id="prof-avatar-file" accept="image/*" onchange="handleAvatarFileUpload(event)" style="font-size: 0.85rem; color: var(--text-muted);" />
+              </div>
+              <div>
+                <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 6px;">Or Photo URL</label>
+                <input type="text" id="prof-avatar-url" placeholder="https://example.com/avatar.jpg" oninput="handleAvatarUrlInput(this.value)" style="width: 100%; padding: 10px 14px; border-radius: 10px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); color: var(--text); font-size: 0.88rem; outline: none;" />
+              </div>
+              <div>
+                <button type="button" class="btn" style="padding: 6px 14px; font-size: 0.78rem;" onclick="resetDefaultAvatar()">Reset to Official Cyber Avatar</button>
+              </div>
+            </div>
+          </div>
+
+          <h3 style="font-size: 1.05rem; margin-bottom: 16px; color: var(--pink);">Social Media Handles</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>GitHub URL</label>
+              <input type="text" id="prof-github" placeholder="https://github.com/yourusername" value="https://github.com/sujalsolanki" />
+            </div>
+            <div class="form-group">
+              <label>LinkedIn URL</label>
+              <input type="text" id="prof-linkedin" placeholder="https://linkedin.com/in/yourusername" value="https://linkedin.com/in/sujalsolanki" />
+            </div>
+            <div class="form-group">
+              <label>Instagram URL</label>
+              <input type="text" id="prof-insta" placeholder="https://instagram.com/yourusername" value="https://instagram.com/sujalsolanki" />
+            </div>
+            <div class="form-group">
+              <label>Twitter / X URL</label>
+              <input type="text" id="prof-twitter" placeholder="https://x.com/yourusername" value="https://x.com/sujalsolanki" />
+            </div>
+          </div>
+
+          <div style="margin-top: 28px;">
+            <button type="submit" class="btn btn-primary">Save Profile &amp; Social Links</button>
+          </div>
+        </form>
+      </div>
+
+    </main>
+  </div>
+
+  <div class="toast" id="toast">Changes Saved Successfully! ✓</div>
+  <input type="file" id="json-import-file" accept=".json" style="display:none;" onchange="handleJSONImport(event)" />
+
+  <script>
+    const AUTH_ID = "sujal";
+    const AUTH_PASS = "sujal7719";
+
+    function checkAuthStatus() {
+      const isAuth = sessionStorage.getItem('sujal_admin_auth');
+      const overlay = document.getElementById('auth-overlay');
+      if (isAuth === 'true') {
+        overlay.style.opacity = '0';
+        setTimeout(() => overlay.style.display = 'none', 300);
+      } else {
+        overlay.style.display = 'flex';
+        overlay.style.opacity = '1';
+      }
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const idInput = document.getElementById('admin-id').value.trim();
+      const passInput = document.getElementById('admin-pass').value.trim();
+      const errBox = document.getElementById('auth-error');
+
+      if (idInput === AUTH_ID && passInput === AUTH_PASS) {
+        sessionStorage.setItem('sujal_admin_auth', 'true');
+        errBox.style.display = 'none';
+        checkAuthStatus();
+        populateProfileFields();
+      } else {
+        errBox.style.display = 'block';
+      }
+    }
+
+    function logoutAdmin() {
+      sessionStorage.removeItem('sujal_admin_auth');
+      location.reload();
+    }
+
+    checkAuthStatus();
+
+    const DEFAULT_AVATAR_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400"><defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%230f172a"/><stop offset="50%" stop-color="%231e1b4b"/><stop offset="100%" stop-color="%23090914"/></linearGradient><linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="%238b5cf6"/><stop offset="50%" stop-color="%2306b6d4"/><stop offset="100%" stop-color="%23ec4899"/></linearGradient><linearGradient id="visor" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%2306b6d4"/><stop offset="100%" stop-color="%233b82f6"/></linearGradient></defs><circle cx="200" cy="200" r="190" fill="url(%23bg)" stroke="url(%23accent)" stroke-width="6"/><circle cx="200" cy="200" r="160" fill="none" stroke="%23ffffff" stroke-opacity="0.08" stroke-width="2"/><circle cx="200" cy="200" r="130" fill="none" stroke="%23ffffff" stroke-opacity="0.08" stroke-width="2"/><path d="M80 370 C 80 290, 130 260, 200 260 C 270 260, 320 290, 320 370 Z" fill="%231e293b" stroke="%238b5cf6" stroke-width="3"/><path d="M140 265 L 200 320 L 260 265 Z" fill="%230f172a"/><path d="M200 320 L 200 370" stroke="%2306b6d4" stroke-width="3" stroke-dasharray="4,4"/><rect x="175" y="210" width="50" height="60" rx="10" fill="%23f1f5f9" opacity="0.9"/><rect x="140" y="100" width="120" height="135" rx="60" fill="%23f8fafc"/><rect x="145" y="135" width="110" height="40" rx="12" fill="url(%23visor)"/><path d="M150 155 L 250 155" stroke="%23ffffff" stroke-width="3" opacity="0.8"/><circle cx="170" cy="155" r="4" fill="%23ffffff"/><circle cx="230" cy="155" r="4" fill="%23ffffff"/><rect x="120" y="130" width="20" height="50" rx="10" fill="%238b5cf6"/><rect x="260" y="130" width="20" height="50" rx="10" fill="%238b5cf6"/><path d="M130 130 C 130 70, 270 70, 270 130" fill="none" stroke="%238b5cf6" stroke-width="8" stroke-linecap="round"/><text x="200" y="210" font-family="monospace" font-size="15" font-weight="bold" fill="%2306b6d4" text-anchor="middle">&lt;SUJAL /&gt;</text></svg>`;
+
+    const DEFAULT_DATA = {
+      profile: {
+        name: "Sujal Solanki",
+        title: "Vibe Coder & Freelance Developer",
+        email: "sujalsolanki7719801@gmail.com",
+        phone: "+91 9079199951",
+        college: "Lucky Institute of Professional Studies",
+        degree: "BCA (Bachelor in Computer Applications)",
+        github: "https://github.com/sujalsolanki",
+        linkedin: "https://linkedin.com/in/sujalsolanki",
+        insta: "https://instagram.com/sujalsolanki",
+        twitter: "https://x.com/sujalsolanki",
+        avatar: DEFAULT_AVATAR_SVG
+      },
+      projects: [
+        { id: 1, title: "Next-Gen E-Commerce", category: "fullstack", desc: "High-performance full-stack online store with real-time cart, checkout, and slick product interactions.", icon: "🛍️", img: "", tags: ["React", "Node.js", "MongoDB"], link: "#" },
+        { id: 2, title: "AI Knowledge Suite", category: "ai", desc: "Intelligent document Q&A assistant with streaming completions, vector search, and workspace memory.", icon: "🤖", img: "", tags: ["Python", "OpenAI", "FastAPI"], link: "#" },
+        { id: 3, title: "Realtime Financial Analytics", category: "frontend", desc: "Clean data dashboard featuring dark/light modes, live websocket data streams, and exportable reports.", icon: "📊", img: "", tags: ["Next.js", "Chart.js", "Tailwind"], link: "#" },
+        { id: 4, title: "VibeChat Workspace", category: "fullstack", desc: "Instant real-time team messaging app with voice channels, file sharing, and dark glassmorphic UI.", icon: "💬", img: "", tags: ["Socket.io", "React", "Express"], link: "#" }
+      ],
+      skills: [
+        { id: 1, name: "React / Next.js", icon: "⚛️", badge: "MAX LEVEL", progress: 92, topics: ["App Router", "SSR / SSG", "Hooks", "State"] },
+        { id: 2, name: "TypeScript", icon: "🔷", badge: "BUFFED", progress: 88, topics: ["Type Safety", "Generics", "Interfaces"] },
+        { id: 3, name: "Tailwind CSS & UI", icon: "🎨", badge: "MASTERED", progress: 95, topics: ["Design Tokens", "Glassmorphism", "Grid"] },
+        { id: 4, name: "Node.js & Express", icon: "🟢", badge: "ADVANCED", progress: 85, topics: ["REST APIs", "Middleware", "JWT"] },
+        { id: 5, name: "Python & AI Integration", icon: "🐍", badge: "SKILLED", progress: 80, topics: ["OpenAI API", "FastAPI", "Automation"] },
+        { id: 6, name: "MongoDB & SQL", icon: "🍃", badge: "ADVANCED", progress: 82, topics: ["Schemas", "Indexing", "Queries"] }
+      ]
+    };
+
+    function getData() {
+      const stored = localStorage.getItem('sujal_portfolio_admin_data');
+      if (stored) {
+        try { return JSON.parse(stored); } catch (e) {}
+      }
+      return DEFAULT_DATA;
+    }
+
+    function saveData(data) {
+      localStorage.setItem('sujal_portfolio_admin_data', JSON.stringify(data));
+      showToast("Portfolio Data Updated & Saved! ✓");
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.admin-content > div').forEach(d => d.style.display = 'none');
+      document.getElementById(tabId).style.display = 'block';
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    function renderProjects() {
+      const data = getData();
+      const list = document.getElementById('projects-list');
+      list.innerHTML = data.projects.map(p => `
+        <div class="item-card">
+          <div class="item-preview">${p.img ? `<img src="${p.img}" alt="${p.title}" />` : p.icon}</div>
+          <div class="item-info">
+            <div class="item-title">${p.title}</div>
+            <div class="item-sub">${p.category.toUpperCase()} • ${p.tags.join(', ')}</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn" onclick="editProject(${p.id})">Edit</button>
+            <button class="btn btn-danger" onclick="deleteProject(${p.id})">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderSkills() {
+      const data = getData();
+      const list = document.getElementById('skills-list');
+      list.innerHTML = data.skills.map(s => `
+        <div class="item-card">
+          <div class="item-preview">${s.icon}</div>
+          <div class="item-info">
+            <div class="item-title">${s.name} (${s.progress}%)</div>
+            <div class="item-sub">${s.badge} • ${s.topics.join(', ')}</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn" onclick="editSkill(${s.id})">Edit</button>
+            <button class="btn btn-danger" onclick="deleteSkill(${s.id})">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    let currentAvatarData = "";
+
+    function populateProfileFields() {
+      const data = getData();
+      const p = data.profile || DEFAULT_DATA.profile;
+      document.getElementById('prof-name').value = p.name || '';
+      document.getElementById('prof-title').value = p.title || '';
+      document.getElementById('prof-email').value = p.email || '';
+      document.getElementById('prof-phone').value = p.phone || '';
+      document.getElementById('prof-college').value = p.college || '';
+      document.getElementById('prof-degree').value = p.degree || '';
+      document.getElementById('prof-github').value = p.github || '';
+      document.getElementById('prof-linkedin').value = p.linkedin || '';
+      document.getElementById('prof-insta').value = p.insta || '';
+      document.getElementById('prof-twitter').value = p.twitter || '';
+
+      currentAvatarData = p.avatar || DEFAULT_AVATAR_SVG;
+      document.getElementById('admin-avatar-preview').src = currentAvatarData;
+    }
+
+    function handleAvatarFileUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          currentAvatarData = evt.target.result;
+          document.getElementById('admin-avatar-preview').src = currentAvatarData;
+          document.getElementById('prof-avatar-url').value = "";
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function handleAvatarUrlInput(val) {
+      if (val && val.trim()) {
+        currentAvatarData = val.trim();
+        document.getElementById('admin-avatar-preview').src = currentAvatarData;
+      }
+    }
+
+    function resetDefaultAvatar() {
+      currentAvatarData = DEFAULT_AVATAR_SVG;
+      document.getElementById('admin-avatar-preview').src = DEFAULT_AVATAR_SVG;
+      document.getElementById('prof-avatar-url').value = "";
+      document.getElementById('prof-avatar-file').value = "";
+    }
+
+    function saveProfile(e) {
+      e.preventDefault();
+      const data = getData();
+      data.profile = {
+        name: document.getElementById('prof-name').value,
+        title: document.getElementById('prof-title').value,
+        email: document.getElementById('prof-email').value,
+        phone: document.getElementById('prof-phone').value,
+        college: document.getElementById('prof-college').value,
+        degree: document.getElementById('prof-degree').value,
+        github: document.getElementById('prof-github').value,
+        linkedin: document.getElementById('prof-linkedin').value,
+        insta: document.getElementById('prof-insta').value,
+        twitter: document.getElementById('prof-twitter').value,
+        avatar: currentAvatarData || DEFAULT_AVATAR_SVG
+      };
+      saveData(data);
+    }
+
+    function handleImageUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          document.getElementById('proj-img-data').value = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function saveProject(e) {
+      e.preventDefault();
+      const data = getData();
+      const id = document.getElementById('proj-id').value;
+      const title = document.getElementById('proj-title').value;
+      const category = document.getElementById('proj-category').value;
+      const desc = document.getElementById('proj-desc').value;
+      const icon = document.getElementById('proj-icon').value || '🚀';
+      const img = document.getElementById('proj-img-data').value || '';
+      const tags = document.getElementById('proj-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+      const link = document.getElementById('proj-link').value || '#';
+
+      if (id) {
+        const idx = data.projects.findIndex(p => p.id == id);
+        if (idx !== -1) {
+          data.projects[idx] = { id: +id, title, category, desc, icon, img: img || data.projects[idx].img, tags, link };
+        }
+      } else {
+        data.projects.push({ id: Date.now(), title, category, desc, icon, img, tags, link });
+      }
+
+      saveData(data);
+      resetProjectForm();
+      renderProjects();
+    }
+
+    function editProject(id) {
+      const data = getData();
+      const p = data.projects.find(x => x.id == id);
+      if (p) {
+        document.getElementById('proj-id').value = p.id;
+        document.getElementById('proj-title').value = p.title;
+        document.getElementById('proj-category').value = p.category;
+        document.getElementById('proj-desc').value = p.desc;
+        document.getElementById('proj-icon').value = p.icon;
+        document.getElementById('proj-img-data').value = p.img || '';
+        document.getElementById('proj-tags').value = p.tags.join(', ');
+        document.getElementById('proj-link').value = p.link;
+        document.getElementById('pform-title').textContent = 'Edit Project #' + p.id;
+      }
+    }
+
+    function deleteProject(id) {
+      if (confirm('Are you sure you want to delete this project?')) {
+        const data = getData();
+        data.projects = data.projects.filter(p => p.id != id);
+        saveData(data);
+        renderProjects();
+      }
+    }
+
+    function resetProjectForm() {
+      document.getElementById('project-form').reset();
+      document.getElementById('proj-id').value = '';
+      document.getElementById('proj-img-data').value = '';
+      document.getElementById('pform-title').textContent = 'Add / Edit Project';
+    }
+
+    function saveSkill(e) {
+      e.preventDefault();
+      const data = getData();
+      const id = document.getElementById('skill-id').value;
+      const name = document.getElementById('skill-name').value;
+      const icon = document.getElementById('skill-icon').value;
+      const badge = document.getElementById('skill-badge').value;
+      const progress = +document.getElementById('skill-progress').value;
+      const topics = document.getElementById('skill-topics').value.split(',').map(t => t.trim()).filter(Boolean);
+
+      if (id) {
+        const idx = data.skills.findIndex(s => s.id == id);
+        if (idx !== -1) data.skills[idx] = { id: +id, name, icon, badge, progress, topics };
+      } else {
+        data.skills.push({ id: Date.now(), name, icon, badge, progress, topics });
+      }
+
+      saveData(data);
+      resetSkillForm();
+      renderSkills();
+    }
+
+    function editSkill(id) {
+      const data = getData();
+      const s = data.skills.find(x => x.id == id);
+      if (s) {
+        document.getElementById('skill-id').value = s.id;
+        document.getElementById('skill-name').value = s.name;
+        document.getElementById('skill-icon').value = s.icon;
+        document.getElementById('skill-badge').value = s.badge;
+        document.getElementById('skill-progress').value = s.progress;
+        document.getElementById('skill-topics').value = s.topics.join(', ');
+      }
+    }
+
+    function deleteSkill(id) {
+      if (confirm('Delete this skill?')) {
+        const data = getData();
+        data.skills = data.skills.filter(s => s.id != id);
+        saveData(data);
+        renderSkills();
+      }
+    }
+
+    function resetSkillForm() {
+      document.getElementById('skill-form').reset();
+      document.getElementById('skill-id').value = '';
+    }
+
+    function exportJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(getData(), null, 2));
+      const a = document.createElement('a');
+      a.setAttribute("href", dataStr);
+      a.setAttribute("download", "sujal-portfolio-backup.json");
+      document.body.appendChild(a); a.click(); a.remove();
+    }
+
+    function importJSON() {
+      document.getElementById('json-import-file').click();
+    }
+
+    function handleJSONImport(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          try {
+            const data = JSON.parse(evt.target.result);
+            saveData(data);
+            location.reload();
+          } catch(err) { alert('Invalid JSON backup file'); }
+        };
+        reader.readAsText(file);
+      }
+    }
+
+    populateProfileFields();
+    renderProjects();
+    renderSkills();
+  </script>
+</body>
+</html>
